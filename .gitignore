@@ -1,0 +1,11 @@
+.env
+node_modules/
+dist/
+*.log
+.impeccable/
+
+# Local voice-design experiments and API render artifacts.
+/voice-bakeoff*/
+/narration/
+scripts/voice-bakeoff.mjs
+scripts/render-intimate-essayist.mjs
