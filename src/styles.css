@@ -314,6 +314,10 @@ h1 {
   font-size: clamp(3.55rem, 7.35vw, 6rem);
 }
 
+.mobile-title-break {
+  display: none;
+}
+
 h2 {
   max-width: 12.5ch;
   margin-bottom: clamp(30px, 4vh, 48px);
@@ -903,7 +907,7 @@ footer button {
     font-size: clamp(2.65rem, 12.6vw, 4.2rem);
   }
 
-  h1 { font-size: clamp(3.2rem, 15.2vw, 4.8rem); }
+  h1 { font-size: clamp(2.9rem, 9.5vw, 4rem); }
   h2 { font-size: clamp(2.8rem, 13.5vw, 4.4rem); }
   h3 { font-size: clamp(2.2rem, 10vw, 3.4rem); }
 
@@ -1000,6 +1004,20 @@ footer button {
 
   footer span { display: none; }
   footer { justify-content: flex-end; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: clamp(2.25rem, 11.6vw, 3.1rem);
+  }
+
+  .hero h1 .mobile-title-break {
+    display: initial;
+  }
+
+  .hero h1 .desktop-title-break {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

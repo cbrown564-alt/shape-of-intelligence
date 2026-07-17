@@ -243,7 +243,11 @@ function App() {
       <section ref={(node) => { chapterRefs.current[0] = node; }} data-scene="0" className="chapter hero">
         <div className="copy hero-copy">
           <p className="opening-line">A tactile essay for curious hands</p>
-          <h1>What is the shape<br />of intelligence?</h1>
+          <h1>
+            What is the<br className="mobile-title-break" />{' '}
+            shape<br className="desktop-title-break" />{' '}of
+            <br className="mobile-title-break" />{' '}intelligence?
+          </h1>
           <div className="questions" aria-label="Questions">
             <span>Can we touch it?</span>
             <span>Can it speak to us?</span>
