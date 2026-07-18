@@ -169,6 +169,10 @@ const collectiveDestinations = [
   [0.08, 0.32],
 ];
 
+function collectiveCentreX(width) {
+  return width < 700 ? width * 0.5 : width * 0.3;
+}
+
 const cityBuildings = [
   { x: 0.53, base: 0.61, width: 0.05, height: 0.18, columns: 5, depth: 0 },
   { x: 0.64, base: 0.61, width: 0.07, height: 0.24, columns: 6, depth: 0 },
@@ -189,7 +193,7 @@ function colonyPoint(index, count, width, height, time) {
   const h2 = hash(index * 2.13 + 8.4);
   const h3 = hash(index * 4.91 + 3.1);
   const min = Math.min(width, height);
-  const centreX = width * 0.66;
+  const centreX = collectiveCentreX(width);
   const centreY = height * 0.51;
   const route = index % collectiveDestinations.length;
   const [endX, endY] = collectiveDestinations[route];
@@ -226,7 +230,7 @@ function flockPoint(index, count, width, height, time) {
   const wave = Math.sin(h1 * TAU * 2.4 + time * 0.42) * min * 0.035;
   const cos = Math.cos(turn);
   const sin = Math.sin(turn);
-  const centreX = width * 0.67 + Math.sin(time * 0.13) * min * 0.055;
+  const centreX = collectiveCentreX(width) + Math.sin(time * 0.13) * min * 0.055;
   const centreY = height * 0.5 + Math.cos(time * 0.17) * min * 0.045;
   const baseX = centreX + spreadX * cos - (spreadY + wave) * sin;
   const baseY = centreY + spreadX * sin + (spreadY + wave) * cos;
@@ -255,7 +259,7 @@ function fungusPoint(index, count, width, height, time) {
   const rows = Math.ceil(count / branches);
   const depth = row / Math.max(rows - 1, 1);
   const angle = (branch / branches) * TAU - 0.42;
-  const rootX = width * 0.66;
+  const rootX = collectiveCentreX(width);
   const rootY = height * 0.51;
   const trunkEnd = 0.46;
   const trunkDepth = Math.min(depth / trunkEnd, 1);
@@ -281,20 +285,28 @@ function fungusPoint(index, count, width, height, time) {
   };
 }
 
-function scentPoint(index, width, height, time) {
-  const h1 = hash(index + 1.37);
-  const h2 = hash(index * 2.13 + 8.4);
-  const h3 = hash(index * 4.91 + 3.1);
+function scentPoint(index, count, width, height, time) {
+  const streamCount = 22;
+  const stream = index % streamCount;
+  const streamSeed = hash(stream * 7.17 + 2.4);
+  const particleSeed = hash(index * 2.13 + 8.4);
+  const streamLength = Math.ceil(count / streamCount);
+  const progress = fract(Math.floor(index / streamCount) / Math.max(streamLength - 1, 1) + time * (0.014 + streamSeed * 0.012));
   const min = Math.min(width, height);
-  const distance = fract(h1 * 0.86 + time * (0.018 + h3 * 0.018));
-  const angle = h2 * TAU * 3 + time * 0.08;
-  const curl = Math.sin(distance * TAU * 2.2 + h2 * TAU) * min * 0.07;
+  const sourceX = width < 700 ? width * 0.74 : width * 0.57;
+  const sourceY = width < 700 ? height * 0.68 : height * 0.56;
+  const spread = min * (0.018 + progress * 0.28);
+  const eddy = Math.sin(progress * TAU * (1.1 + streamSeed * 1.4) + streamSeed * TAU + time * 0.24) * min * (0.012 + progress * 0.065);
+  const airLift = -progress * min * 0.075 + Math.sin(time * 0.16 + streamSeed * TAU) * min * 0.025;
+  const plumeDrift = Math.sin(progress * TAU * 0.7 + time * 0.12) * min * 0.028;
+
   return {
-    x: width * 0.53 + distance * width * 0.42 + Math.cos(angle) * min * 0.05 * distance,
-    y: height * 0.5 + (h2 - 0.5) * min * 0.4 * distance + curl,
-    color: h3 > 0.48 ? 'human' : 'alien',
-    alpha: 0.18 + (1 - distance) * 0.78,
-    path: distance,
+    x: sourceX + progress * width * (0.31 + streamSeed * 0.08) + eddy * 0.72,
+    y: sourceY + (streamSeed - 0.5) * spread * 1.55 + eddy + airLift + plumeDrift,
+    color: stream % 5 === 0 || particleSeed > 0.72 ? 'human' : 'alien',
+    alpha: 0.2 + (1 - progress * 0.45) * (0.3 + particleSeed * 0.48),
+    path: progress,
+    scale: 0.72 + (1 - progress) * 0.34,
   };
 }
 
@@ -430,7 +442,7 @@ function shapePoint(scene, variant, collectivePhase, storyProgress, index, count
     return fungusPoint(index, count, width, height, time);
   }
 
-  if (scene === 4) return scentPoint(index, width, height, time);
+  if (scene === 4) return scentPoint(index, count, width, height, time);
 
   if (scene === 5) return alienSensePoint(variant, index, count, width, height, time);
 
@@ -548,7 +560,7 @@ function drawNeuralStructure(context, width, height, alpha, pulsePhase) {
 function drawCollectiveStructure(context, phase, width, height) {
   if (phase === 1) return;
   const min = Math.min(width, height);
-  const centreX = width * 0.66;
+  const centreX = collectiveCentreX(width);
   const centreY = height * 0.51;
 
   context.save();
@@ -609,6 +621,50 @@ function drawCollectiveStructure(context, phase, width, height) {
     context.fill();
   }
 
+  context.restore();
+}
+
+function drawScentStructure(context, width, height, time) {
+  const min = Math.min(width, height);
+  const sourceX = width < 700 ? width * 0.74 : width * 0.57;
+  const sourceY = width < 700 ? height * 0.68 : height * 0.56;
+  const breath = 0.5 + Math.sin(time * 1.25) * 0.5;
+
+  context.save();
+  context.globalCompositeOperation = 'screen';
+  context.lineCap = 'round';
+
+  const sourceGlow = context.createRadialGradient(sourceX, sourceY, 0, sourceX, sourceY, min * 0.13);
+  sourceGlow.addColorStop(0, 'rgba(255, 119, 91, .24)');
+  sourceGlow.addColorStop(0.34, 'rgba(245, 218, 72, .09)');
+  sourceGlow.addColorStop(1, 'rgba(245, 218, 72, 0)');
+  context.fillStyle = sourceGlow;
+  context.beginPath();
+  context.arc(sourceX, sourceY, min * 0.13, 0, TAU);
+  context.fill();
+
+  for (let stream = 0; stream < 8; stream += 1) {
+    const seed = hash(stream * 7.17 + 2.4);
+    const endX = sourceX + width * (0.22 + seed * 0.16);
+    const endY = sourceY - min * (0.04 + seed * 0.16) + Math.sin(time * 0.12 + seed * TAU) * min * 0.025;
+    const bend = (seed - 0.5) * min * 0.3;
+    context.strokeStyle = stream % 3 === 0 ? 'rgba(255, 119, 91, .11)' : 'rgba(245, 218, 72, .09)';
+    context.lineWidth = 0.7 + (1 - seed) * 0.8;
+    context.beginPath();
+    context.moveTo(sourceX, sourceY + (seed - 0.5) * min * 0.025);
+    context.bezierCurveTo(
+      sourceX + width * 0.08, sourceY + bend,
+      sourceX + width * 0.16, endY - bend,
+      endX, endY,
+    );
+    context.stroke();
+  }
+
+  context.strokeStyle = `rgba(255, 119, 91, ${0.18 + breath * 0.1})`;
+  context.lineWidth = 1;
+  context.beginPath();
+  context.arc(sourceX, sourceY, min * (0.018 + breath * 0.008), 0, TAU);
+  context.stroke();
   context.restore();
 }
 
@@ -723,6 +779,9 @@ export default function ParticleField({ scene, variant, collectivePhase, storyPr
       if (activeScene === 3) {
         drawCollectiveStructure(context, collectivePhaseRef.current, width, height);
       }
+      if (activeScene === 4) {
+        drawScentStructure(context, width, height, time);
+      }
 
       context.globalCompositeOperation = 'lighter';
 
@@ -752,9 +811,9 @@ export default function ParticleField({ scene, variant, collectivePhase, storyPr
             const px = pointer.x - particle.x;
             const py = pointer.y - particle.y;
             const distanceSq = px * px + py * py;
-            const reach = pointer.active ? 62000 : 15000;
+            const reach = pointer.active ? activeScene === 4 ? 100000 : 62000 : 15000;
             if (distanceSq < reach && distanceSq > 25) {
-              const compression = activeScene === 1 ? 0.09 : 0.055;
+              const compression = activeScene === 1 ? 0.09 : activeScene === 4 ? -0.042 : 0.055;
               const force = (1 - distanceSq / reach) * (pointer.active ? compression : -0.018);
               particle.vx += px * force * delta;
               particle.vy += py * force * delta;

@@ -28,8 +28,8 @@ const chapters = [
     audio: '/audio/narration/02-stone-remembers.mp3',
   },
   {
-    title: 'The first intelligence was wet.',
-    narration: 'The first intelligence was wet. Before there were models, there were membranes. Before logic, appetite. Life learned by growing, sensing, copying, forgetting, and trying again.',
+    title: 'A pattern learned to grow.',
+    narration: 'A pattern learned to grow. The pulse left the crystal and entered living matter. A cell leaned toward warmth. A root found water in the dark. A nervous system learned what to keep—and what to forget.',
     audio: '/audio/narration/03-first-intelligence-was-wet.mp3',
   },
   {
@@ -329,9 +329,9 @@ function App() {
       <section ref={(node) => { chapterRefs.current[2] = node; }} data-scene="2" className="chapter life">
         <div className="life-image" aria-hidden="true" />
         <div className="copy life-copy">
-          <h2>The first intelligence was wet.</h2>
-          <p>Before models, there were membranes. Before logic, appetite. A cell leaned toward warmth. A root found water in the dark. A nervous system learned what to keep—and what to forget.</p>
-          <p className="statement green">Life did not begin by knowing. It began by becoming.</p>
+          <h2>A pattern learned to grow.</h2>
+          <p>The pulse left the crystal and entered living matter. A cell leaned toward warmth. A root found water in the dark. A nervous system learned what to keep—and what to forget.</p>
+          <p className="statement green">Life starts by adapting.</p>
         </div>
         <div className="biology-index" aria-label="Forms of biological intelligence">
           <span>DNA copies</span><span>neurons pulse</span><span>mycelium routes</span><span>bodies remember</span>
@@ -368,7 +368,7 @@ function App() {
           <p>Computers mostly read symbols, light, and voltage. Give them chemical senses and their world becomes unfamiliar to us.</p>
         </div>
         <div className="scent-scale" aria-hidden="true">
-          <span>MOLECULE</span><i /><span>PATTERN</span><i /><span>MEANING</span>
+          <span>SOURCE</span><i /><span>PLUME</span><i /><span>TRACE</span>
         </div>
       </section>
 
